@@ -38,14 +38,14 @@ class BERTDataset(Dataset):
         t1, t2, is_next_label = self.random_sent(item)
         t1_random, t1_label = self.random_word(t1)
         t2_random, t2_label = self.random_word(t2)
-
+        # 词嵌入: token embedding
         # [CLS] tag = SOS tag, [SEP] tag = EOS tag
         t1 = [self.vocab.sos_index] + t1_random + [self.vocab.eos_index]
         t2 = t2_random + [self.vocab.eos_index]
 
         t1_label = [self.vocab.pad_index] + t1_label + [self.vocab.pad_index]
         t2_label = t2_label + [self.vocab.pad_index]
-
+        # 片段嵌入: segment embedding( ? 这里为什么要截断)
         segment_label = ([1 for _ in range(len(t1))] + [2 for _ in range(len(t2))])[:self.seq_len]
         bert_input = (t1 + t2)[:self.seq_len]
         bert_label = (t1_label + t2_label)[:self.seq_len]
@@ -85,6 +85,7 @@ class BERTDataset(Dataset):
 
             else:
                 tokens[i] = self.vocab.stoi.get(token, self.vocab.unk_index)
+                # TODO: 被忽略的部分,不参与损失计算
                 output_label.append(0)
 
         return tokens, output_label
